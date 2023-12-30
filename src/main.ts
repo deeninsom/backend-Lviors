@@ -33,7 +33,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('BACKEND DOCS API')
+    .setTitle('API DOCS API')
     .setDescription('Base url: /api/v1')
     .setVersion('1.0')
     .addBearerAuth(
