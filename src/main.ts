@@ -33,7 +33,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('API DOCS API')
+    .setTitle('BACKEND DOCS API')
     .setDescription('Base url: /api/v1')
     .setVersion('1.0')
     .addBearerAuth(
@@ -52,7 +52,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   SwaggerModule.setup('/docs', app, document, {
-    customSiteTitle: 'TRACKING APPS API DOCS',
+    customSiteTitle: 'BACKEND DOCS API',
     customfavIcon:
       'https://www.mandirikartukredit.com/uploads/media/merchant/key-visual-hot-offer/default/key-visual-hot-offer/asian-golf--logo-150x150.jpg',
     customJs: [
