@@ -117,6 +117,36 @@ export class UserService {
     });
   }
 
+  async changePassword(id: string, payload: any) {
+    // cheking user first
+    const foundId = await this.prisma.user.findUnique({
+      where: {
+        id: id
+      }
+    });
+
+    if (!foundId) throw new HttpException(`User with id ${foundId} not found !`, HttpStatus.NOT_FOUND)
+
+    // check old password
+    const passwordMatch = await bcrypt.compare(payload.oldPassword, foundId.password);
+    if (!passwordMatch) throw new HttpException('Password tidak cocok!', HttpStatus.UNAUTHORIZED,);
+
+
+    if (payload.confirmNewPassword !== payload.newPassword) throw new HttpException('Konfirmasi password tidak cocok!', HttpStatus.UNAUTHORIZED,);
+    
+    // hashed password
+    const hashedPassword = await bcrypt.hash(payload.confirmNewPassword, 10);
+
+    return this.prisma.user.update({
+      data: {
+        password: hashedPassword
+      },
+      where: {
+        id: foundId.id
+      },
+    });
+  }
+
   // Hash password
   private hashedPassword(password: any) {
     try {

@@ -10,12 +10,14 @@ import {
   Res,
   HttpException,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
-import { CreateUserDto, QueryUserDto, UpdateUserDto } from './user.dto';
+import * as jwt from 'jsonwebtoken';
+import { ChangePasswordDto, CreateUserDto, QueryUserDto, UpdateUserDto } from './user.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -164,6 +166,36 @@ export class UsersController {
       return res
         .status(200)
         .json({ status: true, message: 'Successfully deleted user', data: {} });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res
+          .status(error.getStatus())
+          .json({ status: false, message: error.message });
+      } else {
+        return res
+          .status(500)
+          .json({
+            status: false,
+            message: 'Terjadi kesalahan server !',
+            error: error.message,
+          });
+      }
+    }
+  }
+
+  @Post('change-password')
+  async changePassword(@Headers() headers: any, @Body() payload: ChangePasswordDto, @Res() res: Response) {
+    try {
+      const token = headers['authorization'].replace('Bearer ', '');
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET);
+      const data = await this.userService.changePassword(decoded.id, payload);
+      return res
+        .status(200)
+        .json({
+          status: true,
+          message: 'Successfully create user',
+          data,
+        });
     } catch (error) {
       if (error instanceof HttpException) {
         return res

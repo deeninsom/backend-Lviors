@@ -14,7 +14,7 @@ model User {
   id            String   @id @default(uuid())
   username      String   @unique
   email         String   @unique
-  password      String
+  password      String   @unique
   image_profile String?
   jwt_token     String?  @unique @db.Char(255)
   posted        Post[]
