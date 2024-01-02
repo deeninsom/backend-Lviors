@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PostService } from './post.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
-import { CreatePostDto, LikePostDto, QueryPostDto, UpdatePostDto } from './post.dto';
+import { CreatePostDto, QueryPostDto, UpdatePostDto } from './post.dto';
 
 @ApiTags('post')
 @Controller('post')
@@ -47,10 +47,11 @@ export class PostController {
               author_id: {
                 contains: search.user_id,
               },
-            }
-          ]
-        }
-      }
+            },
+          ],
+        },
+      };
+      
 
       const {
         data,
@@ -58,7 +59,7 @@ export class PostController {
         page: pages,
         totalPages,
         limit
-      } = await this.postService.get(search.page, search.limit, whereConditions.where);
+      } = await this.postService.get(search.page, search.limit, search);
 
       return res.status(200).json({
         status: true,
@@ -195,10 +196,38 @@ export class PostController {
     }
   }
 
-  @Post('likes')
-  async likes(@Body() payload: LikePostDto, @Res() res: Response) {
+  @Put('like/:id')
+  async likes(@Param('id') id: string, @Res() res: Response) {
     try {
-      const data = await this.postService.likes(payload);
+      const data = await this.postService.likes(id);
+      return res
+        .status(200)
+        .json({
+          status: true,
+          message: 'Successfully likes post',
+          data,
+        });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res
+          .status(error.getStatus())
+          .json({ status: false, message: error.message });
+      } else {
+        return res
+          .status(500)
+          .json({
+            status: false,
+            message: 'Terjadi kesalahan server !',
+            error: error.message,
+          });
+      }
+    }
+  }
+
+  @Put('unlike/:id')
+  async unlikes(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const data = await this.postService.unlikes(id);
       return res
         .status(200)
         .json({

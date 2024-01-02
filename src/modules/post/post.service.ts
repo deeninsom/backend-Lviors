@@ -1,27 +1,40 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Post } from '@prisma/client';
-import { CreatePostDto } from './post.dto';
+import { CreatePostDto, QueryPostDto } from './post.dto';
 
 
 @Injectable()
 export class PostService {
   constructor(private prisma: PrismaService) { }
 
-  async get(page: number, limit: number, where: any) {
+  async get(page: number, limit: number, search: QueryPostDto) {
 
     if (page <= 0) {
       page = 1
     }
 
+    const whereConditions: any = {}
+
+    if (search.search) {
+      whereConditions.OR = [
+        { caption: { contains: search.search } },
+        { tags: { contains: search.search } }
+      ];
+    }
+
+    if (search.user_id) {
+      whereConditions.author_id = { contains: search.user_id }
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.post.findMany({
-        where,
+        where: whereConditions,
         skip: (page - 1) * limit,
         take: limit,
       }),
       this.prisma.post.count({
-        where,
+        where: whereConditions,
       }),
     ]);
 
@@ -108,11 +121,11 @@ export class PostService {
     });
   }
 
-  async likes(data: any) {
+  async likes(id: any) {
     // cheking user first
     const foundId = await this.prisma.post.findUnique({
       where: {
-        id: data.id
+        id: id
       }
     });
 
@@ -120,9 +133,32 @@ export class PostService {
       throw new HttpException(`Post with id ${foundId} not found !`, HttpStatus.NOT_FOUND)
     }
 
-    data.likes = data.likes + foundId.likes
     return this.prisma.post.update({
-      data,
+      data: {
+        likes: foundId.likes + 1
+      },
+      where: {
+        id: (await foundId).id
+      },
+    });
+  }
+
+  async unlikes(id: any) {
+    // cheking user first
+    const foundId = await this.prisma.post.findUnique({
+      where: {
+        id: id
+      }
+    });
+
+    if (!foundId) {
+      throw new HttpException(`Post with id ${foundId} not found !`, HttpStatus.NOT_FOUND)
+    }
+
+    return this.prisma.post.update({
+      data: {
+        likes: foundId.likes - 1
+      },
       where: {
         id: (await foundId).id
       },

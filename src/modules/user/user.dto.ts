@@ -61,3 +61,19 @@ export class QueryUserDto {
   search?: string;
 
 }
+
+export class ChangePasswordDto {
+
+  @ApiProperty()
+  @IsNotEmpty()
+  oldPassword?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  newPassword?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  confirmNewPassword?: string;
+
+}
