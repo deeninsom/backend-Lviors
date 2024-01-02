@@ -32,6 +32,7 @@ async function main() {
 
 main()
   .then(async () => {
+    console.log('Migration seed successfully')
     await prisma.$disconnect()
   })
   .catch(async (e) => {
