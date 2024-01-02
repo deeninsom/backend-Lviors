@@ -16,7 +16,6 @@ $ npm run migration:dev
 $ npm run seed
 ```
 
-
 ## Running the app
 
 ```bash
